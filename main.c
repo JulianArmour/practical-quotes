@@ -1,15 +1,23 @@
+#include <stdlib.h>
 #include <curl/curl.h>
+#include "data.h"
 
 int main(void)
 {
     // initialize the libcurl
     curl_global_init(CURL_GLOBAL_ALL);
 
-    CURL *curl = curl_easy_init();
-    curl_easy_setopt(curl, CURLOPT_URL,
-        "https://practicalguidetoevil.wordpress.com/2015/04/01/chapter-1-knife/");
-    curl_easy_perform(curl);
-    curl_easy_cleanup(curl);
+    char *webpage = NULL;
+    int result = data_fetch_page(
+        &webpage,
+        "https://practicalguidetoevil.wordpress.com/"
+        "2019/04/05/chapter-30-weaver-woven/"
+    );
+    if (result != 0) {
+        fprintf(stderr, "FATAL: %s\n", "Couldn't fetch the webpage");
+        exit(EXIT_FAILURE);
+    }
+    printf("%s\n", webpage);
 
     // clean up libcurl
     curl_global_cleanup();

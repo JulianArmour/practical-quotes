@@ -1,21 +1,19 @@
 CC = gcc
 CFLAGS = \
+	-std=c99 \
 	-g \
 	-ggdb \
 	-Og \
 	-Wall \
 	-Wextra \
 	-Wwrite-strings \
-	-Wswitch-default \
-	-Wswitch-enum \
 	-Werror
-objects = main.o
+objects = main.o data.o
 
 practical-quotes : $(objects)
-	$(CC) -o $@ $< -lcurl
+	$(CC) -o $@ $^ -lcurl
 
-practical_quotes.o : practical_quotes.c
-	gcc -c -o $@ $<
+main.o : data.h
 
 .PHONY : clean
 clean :
