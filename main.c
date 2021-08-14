@@ -8,16 +8,17 @@ int main(void)
     curl_global_init(CURL_GLOBAL_ALL);
 
     char *webpage = NULL;
-    int result = data_fetch_page(
+    int success = data_fetch_page(
         &webpage,
         "https://practicalguidetoevil.wordpress.com/"
-        "2019/04/05/chapter-30-weaver-woven/"
+        "table-of-contents/"
     );
-    if (result != 0) {
+    if (!success) {
         fprintf(stderr, "FATAL: %s\n", "Couldn't fetch the webpage");
         exit(EXIT_FAILURE);
     }
     printf("%s\n", webpage);
+    free(webpage);
 
     // clean up libcurl
     curl_global_cleanup();

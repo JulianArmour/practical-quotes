@@ -35,7 +35,7 @@ static size_t write_callback(char *ptr, size_t size,
     return size * nmemb;
 }
 
-int data_fetch_page(char **webpage_result, const char *url) 
+bool data_fetch_page(char **webpage_result, const char *url) 
 {
     /* set up the callback's userdata.
      * We start with just the null-terminator '\0'.
@@ -51,8 +51,7 @@ int data_fetch_page(char **webpage_result, const char *url)
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &userdata);
     CURLcode result = curl_easy_perform(curl);
     curl_easy_cleanup(curl);
-    // return result code
-    if (result != CURLE_OK) return 1;
+    if (result != CURLE_OK) return false;
     *webpage_result = userdata.buffer;
-    return 0;
+    return true;
 }

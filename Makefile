@@ -1,3 +1,4 @@
+RM = rm -f
 CC = gcc
 CFLAGS = \
 	-std=c99 \
@@ -15,7 +16,13 @@ practical-quotes : $(objects)
 
 main.o : data.h
 
+test_parser : test_parser.o parser.c unity.o
+	$(CC) -o $@ $^
+
+test_parser.o : parser.h
+
 .PHONY : clean
 clean :
-	rm practical-quotes
-	rm *.o
+	$(RM) practical-quotes
+	$(RM) test_parser
+	$(RM) *.o

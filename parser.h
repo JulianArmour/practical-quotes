@@ -13,10 +13,16 @@ typedef struct {
     char *name;     // Chapter name.
     char *url;      // URL to the chapter.
     bool  is_extra; // True if this is one of the "Extra Chapters".
-} data_chapter_info;
+} chapter_info;
 
+/**
+ * @brief A list of the webnovel's chapters.
+ */
+typedef struct {
+    unsigned int length;  // Length of the list.
+    chapter_info *list;   // Pointer to an array of chapter_info structs.
+} chapter_info_list;
 
-int data_fetch_chapter_info(data_chapter_info *results,
-                            unsigned int      *results_length);
+chapter_info_list parser_parse_TOC(char *html);
 
-#endif
+#endif  // PRACTICAL_PARSER_H
