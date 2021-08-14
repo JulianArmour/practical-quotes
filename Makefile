@@ -16,7 +16,7 @@ practical-quotes : $(objects)
 
 main.o : data.h
 
-test_parser : test_parser.o parser.c unity.o
+parser.test : test_parser.o parser.c unity.o
 	$(CC) -o $@ $^
 
 test_parser.o : parser.h
@@ -24,5 +24,5 @@ test_parser.o : parser.h
 .PHONY : clean
 clean :
 	$(RM) practical-quotes
-	$(RM) test_parser
+	$(RM) *.test
 	$(RM) *.o

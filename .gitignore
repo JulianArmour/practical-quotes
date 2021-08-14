@@ -1,3 +1,4 @@
 *.o
 practical-quotes
+*.test
 .vscode
