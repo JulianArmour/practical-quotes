@@ -23,6 +23,14 @@ typedef struct {
     chapter_info *list;   // Pointer to an array of chapter_info structs.
 } chapter_info_list;
 
+/**
+ * @brief Parses the Table of Contents. IMPORTANT: The callee is responsible for
+ *        calling free() on the list (if not empty) when done with it.
+ * 
+ * @param html The html string to parse. This is from the Table of Contents page
+ *             on the webpage.
+ * @return A list of chapter metadata. 
+ */
 chapter_info_list parser_parse_TOC(char *html);
 
 #endif  // PRACTICAL_PARSER_H
