@@ -57,14 +57,18 @@ void test_TOC_HTML_LOADED(void) {
 }
 
 void test_parser_parse_TOC__return_not_empty(void) {
-    chapter_info_list chapters = parser_parse_TOC(TOC_buffer);
-    TEST_ASSERT_GREATER_THAN_UINT(0, chapters.length);
+    chapter_info_list *chapters = parser_parse_TOC(TOC_buffer);
+    TEST_ASSERT_GREATER_THAN_UINT(0, chapters->length);
 }
 
 void test_parser_parse_TOC__book_1_is_first(void) {
-    chapter_info_list chapters = parser_parse_TOC(TOC_buffer);
-    TEST_ASSERT_EQUAL(1, chapters.list[0].book);
-    free(chapters.list);
+    chapter_info_list *chapters = parser_parse_TOC(TOC_buffer);
+    TEST_ASSERT_EQUAL(1, chapters->list[0].book);
+}
+
+void test_parser_parse_TOC__prologue_is_first_chapter(void) {
+    chapter_info_list *chapters = parser_parse_TOC(TOC_buffer);
+    TEST_ASSERT_EQUAL_STRING("Prologue", chapters->list[0].name);
 }
 
 int main(void) {
@@ -75,6 +79,7 @@ int main(void) {
     RUN_TEST(test_TOC_HTML_LOADED);
     RUN_TEST(test_parser_parse_TOC__return_not_empty);
     RUN_TEST(test_parser_parse_TOC__book_1_is_first);
+    RUN_TEST(test_parser_parse_TOC__prologue_is_first_chapter);
 
     TOC_buffer_teardown();
     return UNITY_END();
