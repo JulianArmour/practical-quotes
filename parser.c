@@ -43,7 +43,6 @@ chapter_info_list* parser_parse_TOC(char *html) {
     /* time for the fun bit, let's parse out the chapter info and set the data
        fields in the chapter_info struct. */
     chapter_info *the_chapter_info = &chapters.list[chapters.length];
-
     /* The parsing pattern (following a python f-string style)
        is: "href=\"{url}\">{chapter_name}<". */
     char format[60] = {0};
@@ -55,7 +54,7 @@ chapter_info_list* parser_parse_TOC(char *html) {
         fprintf(stderr, "%s\n", "Couldn't parse the chapter url and/or name");
         return &chapters;
     }
-    the_chapter_info->is_extra = false;
+    the_chapter_info->is_extra = false;  // none of these are "extra chapters"
     the_chapter_info->book = book_number;
     chapters.length++;
 
