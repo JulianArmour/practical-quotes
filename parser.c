@@ -6,6 +6,47 @@
 
 static chapter_info_list chapters;
 
+static void parse_chapter_list(
+    int          book_number,
+    char * const start_of_chapter_list,
+    char * const end_of_chapter_list,
+    char * const li_parsing_format
+) {
+    // keep parsing until we get to the end of the <ul> block
+    char *start_of_line_parse = start_of_chapter_list;
+    while (true) {
+        /* let's go to the start of the <li> tag */
+        char *li = strstr(start_of_line_parse, "<li");
+        /* Two loop exit conditions:
+            There are no chapters left to parse in the table of contents or
+            there are no chapters left to parse in this book. Either case
+            means we are done parsing so we just return.
+        */
+        if (!li || li > end_of_chapter_list) {
+            return;
+        }
+        /* next, the href attribute */
+        char *href = strstr(li, "href");
+        /* time for the fun bit, let's parse out the chapter info and set the data
+           fields in the chapter_info struct. */
+        chapter_info *the_chapter_info = &chapters.list[chapters.length];
+        int n_chars_read;
+        int c = sscanf(href, li_parsing_format, the_chapter_info->url,
+                       the_chapter_info->name, &n_chars_read);
+        if (c != 2) {
+            fprintf(stderr, "%s\n", "Couldn't parse the chapter url and/or name");
+            return &chapters;
+        }
+        // none of these are "extra chapters"
+        the_chapter_info->is_extra = false;
+        the_chapter_info->book = book_number;
+        chapters.length++;
+        /* set up the next iteration to start searching from where we just 
+           finished parsing. */
+        start_of_line_parse = href + n_chars_read;
+    }
+}
+
 chapter_info_list* parser_parse_TOC(char *html) {
         /* The parsing pattern (following a python f-string style)
            for parsing the url and chapter name from each <li> element is:
@@ -44,43 +85,12 @@ chapter_info_list* parser_parse_TOC(char *html) {
        we know when to stop reading each chapter for this book. */
     char *end_of_chapter_list = strstr(start_of_chapter_list, "</ul>");
 
-    // keep parsing until we get to the end of the <ul> block
-    char *start_of_line_parse = start_of_chapter_list;
-    while (true) {
-        /* let's go to the start of the <li> tag */
-        char *li = strstr(start_of_line_parse, "<li");
-        /* Two loop exit conditions:
-            1. There are no more chapters left to parse in the TOC, so we just
-                return the list of chapters.
-            2. There are no more chapters left to parse in this book, so we just
-                break so we can move onto parsing the next book (if it exists).
-        */
-        if (!li) {
-            return &chapters;
-        }
-        if (li > end_of_chapter_list) {
-            break;
-        }
-        /* next, the href attribute */
-        char *href = strstr(li, "href");
-        /* time for the fun bit, let's parse out the chapter info and set the data
-           fields in the chapter_info struct. */
-        chapter_info *the_chapter_info = &chapters.list[chapters.length];
-        int n_chars_read;
-        int c = sscanf(href, li_parsing_format, the_chapter_info->url,
-                       the_chapter_info->name, &n_chars_read);
-        if (c != 2) {
-            fprintf(stderr, "%s\n", "Couldn't parse the chapter url and/or name");
-            return &chapters;
-        }
-        // none of these are "extra chapters"
-        the_chapter_info->is_extra = false;
-        the_chapter_info->book = book_number;
-        chapters.length++;
-        /* set up the next iteration to start searching from where we just 
-           finished parsing. */
-        start_of_line_parse = href + n_chars_read;
-    }
+    parse_chapter_list(
+        book_number,
+        start_of_chapter_list,
+        end_of_chapter_list,
+        li_parsing_format
+    );
 
     return &chapters;
 }
