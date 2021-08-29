@@ -96,6 +96,24 @@ void test_parser_parse_TOC__book2_chapter1_is_prologue(void) {
     TEST_ASSERT_EQUAL_STRING("Prologue", chapters->list[30].name);
 }
 
+
+void test_parser_parse_TOC__book2_chapter1_url(void) {
+    TEST_ASSERT_EQUAL_STRING(
+        "https://practicalguidetoevil.wordpress.com/2015/11/04/prologue-2/",
+        chapters->list[30].url);
+}
+
+void test_parser_parse_TOC__last_chapter_is_Grieved(void) {
+    TEST_ASSERT_EQUAL_STRING(
+        "Chapter 28: Grieved",
+        chapters->list[chapters->length - 1].name
+    );
+}
+
+void test_parser_parse_TOC__last_chapter_is_book_7(void) {
+    TEST_ASSERT_EQUAL_INT(7, chapters->list[chapters->length - 1].book);
+}
+
 void test_parser_parse_TOC__all_chapters_not_extra(void) {
     for (size_t i = 0; i < chapters->length; i++) {
         TEST_ASSERT_EQUAL_INT(false, chapters->list[i].is_extra);
@@ -117,6 +135,9 @@ int main(void) {
     RUN_TEST(test_parser_parse_TOC__epilogue_is_29th_chapter);
     RUN_TEST(test_parser_parse_TOC__30th_chapter_is_book_2);
     RUN_TEST(test_parser_parse_TOC__book2_chapter1_is_prologue);
+    RUN_TEST(test_parser_parse_TOC__book2_chapter1_url);
+    RUN_TEST(test_parser_parse_TOC__last_chapter_is_Grieved);
+    RUN_TEST(test_parser_parse_TOC__last_chapter_is_book_7);
 
     TOC_buffer_teardown();
     return UNITY_END();
