@@ -9,6 +9,7 @@ CFLAGS = \
 	-Wextra \
 	-Wwrite-strings \
 	-Werror
+
 objects = main.o data.o
 
 practical-quotes : $(objects)
@@ -17,7 +18,7 @@ practical-quotes : $(objects)
 main.o : data.h
 
 parser.test : test_parser.o parser.c unity.o
-	$(CC) -o $@ $^
+	$(CC) -g -o $@ $^
 
 test_parser.o : parser.h
 

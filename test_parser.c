@@ -53,7 +53,7 @@ void setUp(void) {
 }
 
 void tearDown(void) {
-    *chapters = (chapter_info_list){0};
+    memset(chapters, 0, sizeof(*chapters));
 }
 
 void test_TOC_HTML_LOADED(void) {
@@ -77,6 +77,22 @@ void test_parser_parse_TOC__knife_is_second_chapter(void) {
     TEST_ASSERT_EQUAL_STRING("Chapter 1: Knife", chapters->list[1].name);
 }
 
+void test_parser_parse_TOC__epilogue_is_29th_chapter(void) {
+    for (size_t i = 0; i < chapters->length; i++)
+    {
+        printf("%s\n", chapters->list[i].name);
+    }
+    
+    TEST_ASSERT_EQUAL_STRING("Epilogue", chapters->list[29].name);
+}
+
+void test_parser_parse_TOC__prologue_url(void) {
+    TEST_ASSERT_EQUAL_STRING(
+        "https://practicalguidetoevil.wordpress.com/2015/03/25/prologue/",
+        chapters->list[0].url
+    );
+}
+
 void test_parser_parse_TOC__all_chapters_not_extra(void) {
     for (size_t i = 0; i < chapters->length; i++) {
         TEST_ASSERT_EQUAL_INT(false, chapters->list[i].is_extra);
@@ -94,6 +110,8 @@ int main(void) {
     RUN_TEST(test_parser_parse_TOC__prologue_is_first_chapter);
     RUN_TEST(test_parser_parse_TOC__all_chapters_not_extra);
     RUN_TEST(test_parser_parse_TOC__knife_is_second_chapter);
+    RUN_TEST(test_parser_parse_TOC__prologue_url);
+    RUN_TEST(test_parser_parse_TOC__epilogue_is_29th_chapter);
 
     TOC_buffer_teardown();
     return UNITY_END();
