@@ -78,11 +78,6 @@ void test_parser_parse_TOC__knife_is_second_chapter(void) {
 }
 
 void test_parser_parse_TOC__epilogue_is_29th_chapter(void) {
-    for (size_t i = 0; i < chapters->length; i++)
-    {
-        printf("%s\n", chapters->list[i].name);
-    }
-    
     TEST_ASSERT_EQUAL_STRING("Epilogue", chapters->list[29].name);
 }
 
@@ -91,6 +86,14 @@ void test_parser_parse_TOC__prologue_url(void) {
         "https://practicalguidetoevil.wordpress.com/2015/03/25/prologue/",
         chapters->list[0].url
     );
+}
+
+void test_parser_parse_TOC__30th_chapter_is_book_2(void) {
+    TEST_ASSERT_EQUAL_INT(2, chapters->list[30].book);
+}
+
+void test_parser_parse_TOC__book2_chapter1_is_prologue(void) {
+    TEST_ASSERT_EQUAL_STRING("Prologue", chapters->list[30].name);
 }
 
 void test_parser_parse_TOC__all_chapters_not_extra(void) {
@@ -112,6 +115,8 @@ int main(void) {
     RUN_TEST(test_parser_parse_TOC__knife_is_second_chapter);
     RUN_TEST(test_parser_parse_TOC__prologue_url);
     RUN_TEST(test_parser_parse_TOC__epilogue_is_29th_chapter);
+    RUN_TEST(test_parser_parse_TOC__30th_chapter_is_book_2);
+    RUN_TEST(test_parser_parse_TOC__book2_chapter1_is_prologue);
 
     TOC_buffer_teardown();
     return UNITY_END();
