@@ -10,14 +10,14 @@ CFLAGS = \
 	-Wwrite-strings \
 	-Werror
 
-objects = main.o data.o
+objects = main.o data.o parser.o
 
 practical-quotes : $(objects)
-	$(CC) -o $@ $^ -lcurl
+	$(CC) -g -o $@ $^ -lcurl
 
 main.o : data.h
 
-parser.test : test_parser.o parser.c unity.o
+parser.test : test_parser.o parser.o unity.o
 	$(CC) -g -o $@ $^
 
 test_parser.o : parser.h
