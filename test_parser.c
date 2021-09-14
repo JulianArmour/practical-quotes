@@ -120,6 +120,13 @@ void test_parser_parse_TOC__all_chapters_not_extra(void) {
     }
 }
 
+void test_parser_parse_TOC__Moroks_plan(void) {
+    TEST_ASSERT_EQUAL_STRING(
+        "Chapter 23: Morok's Plan",
+        chapters->list[23].name
+    );
+}
+
 int main(void) {
     TOC_buffer_setup();
 
@@ -138,6 +145,7 @@ int main(void) {
     RUN_TEST(test_parser_parse_TOC__book2_chapter1_url);
     RUN_TEST(test_parser_parse_TOC__last_chapter_is_Grieved);
     RUN_TEST(test_parser_parse_TOC__last_chapter_is_book_7);
+    RUN_TEST(test_parser_parse_TOC__Moroks_plan);
 
     TOC_buffer_teardown();
     return UNITY_END();
