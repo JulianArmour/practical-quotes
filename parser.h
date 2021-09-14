@@ -7,12 +7,12 @@
 
 #include <stdbool.h>
 
-/* A safe number, I don't expect the author to post more than these number of 
+/* A safe number, I don't expect the author to post more than these number of
    chapters. */
 #define MAX_CHAPTERS 5000
 
 typedef struct {
-    int  book;      // The book number that the chapter is in.
+    int book;       // The book number that the chapter is in.
     char name[100]; // Chapter name.
     char url[200];  // URL to the chapter.
     bool is_extra;  // True if this is one of the "Extra Chapters".
@@ -28,11 +28,11 @@ typedef struct {
 
 /**
  * @brief Parses the Table of Contents.
- * 
+ *
  * @param html The html string to parse. This is from the Table of Contents page
  *             on the webpage.
- * @return A pointer to a list of chapter metadata. 
+ * @return A pointer to a list of chapter metadata.
  */
-chapter_info_list* parser_parse_TOC(char *html);
+chapter_info_list *parser_parse_TOC(char *html);
 
-#endif  // PRACTICAL_PARSER_H
+#endif // PRACTICAL_PARSER_H

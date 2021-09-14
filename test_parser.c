@@ -1,17 +1,16 @@
+#include "unity.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "unity.h"
 // Unit Under Test: parser.c
 #include "parser.h"
-
 
 char *TOC_buffer;
 
 static void TOC_buffer_setup(void) {
     // set up table of contents test
     FILE *TOC_file = fopen("test_toc.html", "rb");
-    if (!TOC_file) {  // failure
+    if (!TOC_file) { // failure
         perror("Couldn't open TOC_file");
         exit(EXIT_FAILURE);
     }
@@ -27,7 +26,7 @@ static void TOC_buffer_setup(void) {
     }
     rewind(TOC_file);
     // create buffer for the file
-    TOC_buffer = malloc(TOC_file_size + 1);  // + 1 for the null-terminator
+    TOC_buffer = malloc(TOC_file_size + 1); // + 1 for the null-terminator
     if (!TOC_buffer) {
         perror("Couldn't malloc buffer for TOC_file");
         exit(EXIT_FAILURE);
@@ -43,18 +42,12 @@ static void TOC_buffer_setup(void) {
     fclose(TOC_file);
 }
 
-static void TOC_buffer_teardown() {
-    free(TOC_buffer);
-}
+static void TOC_buffer_teardown() { free(TOC_buffer); }
 chapter_info_list *chapters;
 
-void setUp(void) {
-    chapters = parser_parse_TOC(TOC_buffer);
-}
+void setUp(void) { chapters = parser_parse_TOC(TOC_buffer); }
 
-void tearDown(void) {
-    memset(chapters, 0, sizeof(*chapters));
-}
+void tearDown(void) { memset(chapters, 0, sizeof(*chapters)); }
 
 void test_TOC_HTML_LOADED(void) {
     const char *doctype = "<!DOCTYPE html>";
@@ -84,8 +77,7 @@ void test_parser_parse_TOC__epilogue_is_29th_chapter(void) {
 void test_parser_parse_TOC__prologue_url(void) {
     TEST_ASSERT_EQUAL_STRING(
         "https://practicalguidetoevil.wordpress.com/2015/03/25/prologue/",
-        chapters->list[0].url
-    );
+        chapters->list[0].url);
 }
 
 void test_parser_parse_TOC__30th_chapter_is_book_2(void) {
@@ -96,7 +88,6 @@ void test_parser_parse_TOC__book2_chapter1_is_prologue(void) {
     TEST_ASSERT_EQUAL_STRING("Prologue", chapters->list[30].name);
 }
 
-
 void test_parser_parse_TOC__book2_chapter1_url(void) {
     TEST_ASSERT_EQUAL_STRING(
         "https://practicalguidetoevil.wordpress.com/2015/11/04/prologue-2/",
@@ -104,10 +95,8 @@ void test_parser_parse_TOC__book2_chapter1_url(void) {
 }
 
 void test_parser_parse_TOC__last_chapter_is_Grieved(void) {
-    TEST_ASSERT_EQUAL_STRING(
-        "Chapter 28: Grieved",
-        chapters->list[chapters->length - 1].name
-    );
+    TEST_ASSERT_EQUAL_STRING("Chapter 28: Grieved",
+                             chapters->list[chapters->length - 1].name);
 }
 
 void test_parser_parse_TOC__last_chapter_is_book_7(void) {
@@ -121,10 +110,8 @@ void test_parser_parse_TOC__all_chapters_not_extra(void) {
 }
 
 void test_parser_parse_TOC__Moroks_plan(void) {
-    TEST_ASSERT_EQUAL_STRING(
-        "Chapter 23: Morok's Plan",
-        chapters->list[23].name
-    );
+    TEST_ASSERT_EQUAL_STRING("Chapter 23: Morok's Plan",
+                             chapters->list[23].name);
 }
 
 int main(void) {
