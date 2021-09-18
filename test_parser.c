@@ -1,45 +1,62 @@
+#define _POSIX_C_SOURCE 200809L
+
 #include "unity.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 // Unit Under Test: parser.c
 #include "parser.h"
 
-char *TOC_buffer;
+#define FAIL_ERRNO(msg)                                                        \
+    do {                                                                       \
+        perror(msg);                                                           \
+        exit(EXIT_FAILURE);                                                    \
+    } while (0)
 
-static void TOC_buffer_setup(void) {
+char *TOC_buffer;
+char *book_1_prologue;
+
+/**
+ * @brief Reads the contents of a file into a null-terminated string. The caller
+ * is responsible for calling free() when done with the string.
+ *
+ * @param file_path Path to the file to read.
+ * @return The string that holds the content of the file.
+ */
+static char *read_file_into_buffer(const char *file_path) {
     // set up table of contents test
-    FILE *TOC_file = fopen("test_toc.html", "rb");
-    if (!TOC_file) { // failure
-        perror("Couldn't open TOC_file");
-        exit(EXIT_FAILURE);
+    FILE *file = fopen(file_path, "rb");
+    if (!file) {
+        FAIL_ERRNO("Couldn't open TOC_file");
     }
     // get file size
-    if (fseek(TOC_file, 0, SEEK_END) == -1) {
-        perror("Couldn't seek to the end TOC_file");
-        exit(EXIT_FAILURE);
+    struct stat sb;
+    int file_fd = fileno(file);
+    if (file_fd == -1) {
+        FAIL_ERRNO("Couldn't get the file descriptor");
     }
-    long TOC_file_size = ftell(TOC_file);
-    if (TOC_file_size == -1) {
-        perror("Couldn't get the size of TOC_file");
-        exit(EXIT_FAILURE);
+    if (fstat(file_fd, &sb) == -1) {
+        FAIL_ERRNO("Couldn't get file stats");
     }
-    rewind(TOC_file);
-    // create buffer for the file
-    TOC_buffer = malloc(TOC_file_size + 1); // + 1 for the null-terminator
-    if (!TOC_buffer) {
-        perror("Couldn't malloc buffer for TOC_file");
-        exit(EXIT_FAILURE);
+    long TOC_file_size = sb.st_size;
+    // allocate buffer for the file
+    char *buffer = malloc(TOC_file_size + 1); // + 1 for the null-terminator
+    if (!buffer) {
+        FAIL_ERRNO("Couldn't malloc buffer for TOC_file");
     }
     // read the file into that buffer
-    size_t bytes_read = fread((void *)TOC_buffer, 1, TOC_file_size, TOC_file);
+    size_t bytes_read = fread((void *)buffer, 1, TOC_file_size, file);
     if (bytes_read != (size_t)TOC_file_size) {
-        perror("Couldn't read the file into the buffer for TOC_file");
-        exit(EXIT_FAILURE);
+        FAIL_ERRNO("Couldn't read the file into the buffer for TOC_file");
     }
+    buffer[TOC_file_size + 1] = '\0';
+    fclose(file);
+    return buffer;
+}
 
-    TOC_buffer[TOC_file_size + 1] = '\0';
-    fclose(TOC_file);
+static void TOC_buffer_setup(void) {
+    TOC_buffer = read_file_into_buffer("test_toc.html");
 }
 
 static void TOC_buffer_teardown() { free(TOC_buffer); }

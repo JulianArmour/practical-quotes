@@ -12,6 +12,12 @@ CFLAGS = \
 
 objects = main.o data.o parser.o
 
+run : practical-quotes
+	./$<
+
+test : parser.test
+	./parser.test
+
 practical-quotes : $(objects)
 	$(CC) -g -o $@ $^ -lcurl
 
