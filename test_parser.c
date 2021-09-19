@@ -59,7 +59,14 @@ static void TOC_buffer_setup(void) {
     TOC_buffer = read_file_into_buffer("test_toc.html");
 }
 
-static void TOC_buffer_teardown() { free(TOC_buffer); }
+static void TOC_buffer_teardown(void) { free(TOC_buffer); }
+
+static void book1_prologue_setup(void) {
+    book_1_prologue = read_file_into_buffer("test_book_1_prologue.html");
+}
+
+static void book1_prologue_buffer_teardown(void) { free(book_1_prologue); }
+
 chapter_info_list *chapters;
 
 void setUp(void) { chapters = parser_parse_TOC(TOC_buffer); }
@@ -131,8 +138,40 @@ void test_parser_parse_TOC__Moroks_plan(void) {
                              chapters->list[23].name);
 }
 
+/*
+    Tests for parsing the quote from the webpage.
+*/
+
+void test_parser_parse_chapter__book1_prologue(void) {
+    const char *quote_str =
+    "In the beginning, there were only the Gods."
+    "Aeons untold passed as they drifted aimlessly through the Void, until "
+    "they grew bored with this state of affairs. In their infinite wisdom they "
+    "brought into existence Creation, but with Creation came discord. The Gods "
+    "disagreed on the nature of things: some believed their children should be "
+    "guided to greater things, while others believed that they must rule over "
+    "the creatures they had made."
+    "So, we are told, were born Good and Evil."
+    "Ages passed in fruitless argument between them until finally a wager was "
+    "agreed on: it would be the mortals that settled the matter, for strife "
+    "between the gods would only result in the destruction of all. We know "
+    "this wager as Fate, and thus Creation came to know war. Through the "
+    "passing of the years grooves appeared in the workings of Fate, patterns "
+    "repeated until they came into existence easier than not, and those "
+    "grooves came to be called Roles. The Gods gifted these Roles with Names, "
+    "and with those came power. We are all born free, but for every man and "
+    "woman comes a time where a Choice must be made. "
+    "It is, we are told, the only choice that ever really matters.\"";
+    const char *quote_source = "First page of the Book of All Things";
+    chapter_quote quote;
+    parse_chapter_quote(&quote, book_1_prologue);
+    TEST_ASSERT_EQUAL_STRING(quote_str, quote.quote);
+    TEST_ASSERT_EQUAL_STRING(quote_source, quote.source);
+}
+
 int main(void) {
     TOC_buffer_setup();
+    book1_prologue_setup();
 
     UNITY_BEGIN();
 
@@ -150,7 +189,9 @@ int main(void) {
     RUN_TEST(test_parser_parse_TOC__last_chapter_is_Grieved);
     RUN_TEST(test_parser_parse_TOC__last_chapter_is_book_7);
     RUN_TEST(test_parser_parse_TOC__Moroks_plan);
+    RUN_TEST(test_parser_parse_chapter__book1_prologue);
 
     TOC_buffer_teardown();
+    book1_prologue_buffer_teardown();
     return UNITY_END();
 }

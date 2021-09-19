@@ -1,8 +1,17 @@
 #include "parser.h"
 
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#define WARNING(fmt, args...) printf("\e[0;33m" fmt "\e[0m", args)
+
+#define FATAL(fmt, args...)                                                    \
+    do {                                                                       \
+        printf("\e[0;31m" fmt "\e[0m", args);                                  \
+        abort();                                                               \
+    } while (0)
 
 static chapter_info_list chapters;
 
@@ -122,4 +131,122 @@ chapter_info_list *parser_parse_TOC(char *html) {
             parse_chapter_list(book_number, start_of_chapter_list,
                                end_of_chapter_list, li_parsing_format);
     }
+}
+
+/* remove the "- " at the start of the quote */
+static void remove_tick(chapter_quote *cq) {
+    size_t new_source_length = strlen(cq->source) - 2;
+    memmove(cq->source, &cq->source[2], new_source_length);
+    cq->source[new_source_length] = '\0';
+}
+
+/**
+ * @brief Given the start of an html tag, finds the start of text content
+ *        within the tag.
+ * e.g.
+ * <div class="entry-content"> <p><span style="font-size:medium;"><em>Some text
+ * ^                                                                  ^
+ * |-start                                                            |-end
+ * @param parsing_location starting point.
+ * @return Pointer to the start of the text content
+ */
+static inline char *skip_tags(char *parsing_location) {
+    while (*parsing_location == '<') {
+        parsing_location = strchr(parsing_location, '>');
+        do {
+            parsing_location++;
+        } while (isspace(*parsing_location));
+    }
+    return parsing_location;
+}
+
+char *find_quote_source(const char *start_location) {
+    char *const possible_start_1 = strstr(start_location, "&#8211;");
+    char *const possible_start_2 = strstr(start_location, ">-");
+    char *const possible_start_3 = strstr(start_location, "br />\n-");
+    char *const possible_start_4 = strstr(start_location, "br />\n⁃");
+
+    char *possibilities[] = {possible_start_1, possible_start_2,
+                             possible_start_3, possible_start_4};
+    const size_t n_possibilities =
+        sizeof(possibilities) / sizeof(possibilities[0]);
+    /* Find whichever one comes first */
+    char *min = NULL;
+    for (size_t i = 0; i < n_possibilities; i++) {
+        char *possibility = possibilities[i];
+        if (!possibility) {
+            continue;
+        }
+        if (!min) {
+            min = possibility; /* Set it the first time */
+        } else if (possibility < min) {
+            min = possibility;
+        }
+    }
+    if (!min) {
+        FATAL("%s\n", "Couldn't find the quote source");
+    }
+    return min;
+}
+
+void parse_chapter_quote(chapter_quote *chapter_quote_buffer,
+                         const char *html) {
+    int chars_written = 0;
+    char *const start_of_quote = strstr(html, "<div class=\"entry-content\">");
+    char *const start_of_quote_source = find_quote_source(start_of_quote);
+    char *const end_of_quote_block = strstr(start_of_quote_source, "<p>");
+
+    char *parse_loc = start_of_quote;
+    while ((parse_loc = skip_tags(parse_loc)) < start_of_quote_source) {
+        int content_length = strcspn(parse_loc, "<");
+        if (chars_written + content_length > QUOTE_MAX_SIZE - 1) {
+            chapter_quote_buffer->quote[chars_written + 1] = '\0';
+            WARNING("%s\n", "Not enough space to store the entire quote!");
+            return;
+        }
+        strncpy(&chapter_quote_buffer->quote[chars_written], parse_loc,
+                content_length);
+        parse_loc += content_length;
+        chars_written += content_length;
+    }
+    chapter_quote_buffer->quote[chars_written] = '\0';
+
+    chars_written = 0;
+    while ((parse_loc = skip_tags(parse_loc)) < end_of_quote_block) {
+        int content_length = strcspn(parse_loc, "<");
+        if (chars_written + content_length > QUOTE_SOURCE_MAX_SIZE - 1) {
+            chapter_quote_buffer->source[chars_written + 1] = '\0';
+            WARNING("%s\n",
+                    "Not enough space to store the entire quote source!");
+            return;
+        }
+        strncpy(&chapter_quote_buffer->source[chars_written], parse_loc,
+                content_length);
+        parse_loc += content_length;
+        chars_written += content_length;
+    }
+    chapter_quote_buffer->source[chars_written] = '\0';
+
+    struct code_map_t {
+        int code;
+        char c;
+    } code_map[] = {{8211, '-'}, {8221, '"'}, {8217, '\''}};
+    char *strings[] = {chapter_quote_buffer->quote,
+                       chapter_quote_buffer->source};
+    for (size_t str_idx = 0; str_idx < 2; str_idx++) {
+        for (size_t i = 0; i < sizeof(code_map) / sizeof(struct code_map_t);
+             i++) {
+            char *quote_location = strings[str_idx];
+            while ((quote_location = replace_html_code(
+                        quote_location, code_map[i].code, code_map[i].c)))
+                ;
+        }
+    }
+
+    /* remove the "- " at the start of the quote */
+    remove_tick(chapter_quote_buffer);
+    // size_t new_source_length = strlen(chapter_quote_buffer->source) - 2;
+    // memmove(chapter_quote_buffer->source, &chapter_quote_buffer->source[2],
+    //         new_source_length);
+    // chapter_quote_buffer->source[new_source_length] = '\0';
 }
